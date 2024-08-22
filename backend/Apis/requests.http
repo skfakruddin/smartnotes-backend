@@ -1,0 +1,102 @@
+### Users API Requests
+
+### -> Login
+POST http://localhost:3000/user-api/users/login
+Content-Type: application/json
+
+{
+    "username": "fakru",
+    "password": "12345678"
+}
+
+### -> Get All Users
+GET http://localhost:3000/user-api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjQyNTUyNDgsImV4cCI6MTcyNDI2MjQ0OH0.eUBexMiRUlrObUZ6mQPOcy8sytcKDmLBRZKU1kMFVBE
+
+### -> Get User by Username
+GET http://localhost:3000/user-api/users/vignesh
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjQyNTUyNDgsImV4cCI6MTcyNDI2MjQ0OH0.eUBexMiRUlrObUZ6mQPOcy8sytcKDmLBRZKU1kMFVBE
+
+### -> Create New User
+POST http://localhost:3000/user-api/users
+Content-Type: application/json
+
+{
+    "name": "Fakru",
+    "username": "fakru",
+    "password": "12345678",
+    "email": "fakru@gmail.com"
+}
+
+POST http://localhost:3000/user-api/users
+Content-Type: application/json
+
+{
+    "name": "vvsv",
+    "username": "vvsv",
+    "password": "12345678",
+    "email": "vvsv@gmail.com"
+}
+
+### -> Create a New Note
+POST http://localhost:3000/notes-api/create-note
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+Content-Type: application/json
+
+{
+    "title": "First Note",
+    "content": "This is the work content of the first note.",
+    "tags": ["work"]
+}
+
+POST http://localhost:3000/notes-api/create-note
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+Content-Type: application/json
+
+{
+    "title": "Second Note",
+    "content": "This notes should added to personal tag.",
+    "tags": ["personal"]
+}
+
+### -> Get All Notes for Logged-In User 
+GET http://localhost:3000/notes-api/notes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Fetch Notes with "Personal" Tag
+GET http://localhost:3000/notes-api/notes/tag/personal
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+### Fetch Notes with "Work" Tag
+GET http://localhost:3000/notes-api/notes/tag/work
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Mark Note as Favorite
+PUT http://localhost:3000/notes-api/notes/favorite/66c612c3a78ee2428834ff2f
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Unmark Note as Favorite
+PUT http://localhost:3000/notes-api/notes/unfavorite/66c612c3a78ee2428834ff2f
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Fetch Favorite Notes
+GET http://localhost:3000/notes-api/notes/favorites
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Delete Note (move to recycle bin)
+### Delete Note (move to recycle bin)
+PUT http://localhost:3000/notes-api/notes/delete/66c612c3a78ee2428834ff2f
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Delete Note (move to recycle bin)
+PUT http://localhost:3000/notes-api/notes/delete/66c6129da78ee2428834ff2d
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+
+### Get Notes in Recycle Bin
+GET http://localhost:3000/notes-api/notes/recycle-bin
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
+### Undo Delete (Restore Note from Recycle Bin)
+PUT http://localhost:3000/notes-api/notes/restore/66c6129da78ee2428834ff2d
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MjU2ODQ1LCJleHAiOjE3MjQyNjQwNDV9.tJlJ6o8v-MoJCWvyYY60yLxpR4fNQhcxndmPgEIOYQw
+
