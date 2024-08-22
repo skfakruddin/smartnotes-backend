@@ -14,10 +14,8 @@ const mc = new MongoClient(dbURL, { useNewUrlParser: true, useUnifiedTopology: t
 mc.connect().then(connectionObject => {
     const companyDatabase = connectionObject.db('Company');
     const usersCollection = companyDatabase.collection('Users');
-    const notesCollection = companyDatabase.collection('Notes');
-
+    
     app.set('usersCollection', usersCollection);
-    app.set('notesCollection', notesCollection);
 
     console.log('Connected to MongoDB');
     
@@ -34,10 +32,8 @@ app.get('/', (req, res) => {
 });
 
 const userAPI = require('./Apis/UserApi.js');
-const notesAPI = require('./Apis/NotesApi.js');
 
 app.use('/user-api', userAPI);
-app.use('/notes-api', notesAPI);
 
 app.use('*', (req, res) => {
     res.status(404).send({ message: `Path ${req.originalUrl} is invalid` });
