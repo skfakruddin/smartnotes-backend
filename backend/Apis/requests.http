@@ -1,101 +1,88 @@
-### Users API Requests
+# Register a new user
+POST http://localhost:3000/user-api/users
+Content-Type: application/json
 
-### -> Login
+{
+  "name": "John Doe",
+  "username": "john_doe",
+  "password": "password123",
+  "email": "johndoe@example.com",
+  "notesPassword": "note123",
+  "confirmNotesPassword": "note123"
+}
+###
+# Login to obtain JWT token
 POST http://localhost:3000/user-api/users/login
 Content-Type: application/json
 
 {
-    "username": "fakru",
-    "password": "12345678"
+  "username": "vignesh",
+  "password": "vignesh"
 }
 
-### -> Get All Users
+### Get all users (Protected)
 GET http://localhost:3000/user-api/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
 
-### -> Create New User
-POST http://localhost:3000/user-api/users
-Content-Type: application/json
-
-{
-    "name": "Fakru",
-    "username": "fakru",
-    "password": "12345678",
-    "email": "fakru@gmail.com"
-}
-###
-POST http://localhost:3000/user-api/users
-Content-Type: application/json
-
-{
-    "name": "vvsv",
-    "username": "vvsv",
-    "password": "12345678",
-    "email": "vvsv@gmail.com"
-}
-
-### -> Create a New Note
+### Create a new note (Protected)
 POST http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1NDU5MzcsImV4cCI6MTcyNTYzMjMzN30.bVUJw5XnXQGKADEng4ytt_tKGtOWXjdcgb-_QGGBQXQ
 Content-Type: application/json
 
 {
-    "title": "Note1",
-    "content": "This is the work content of the first note.",
-    "tags": ["work"]
-}
-### -> Create a New Note
-POST http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
-Content-Type: application/json
-
-{
-    "title": "Note4",
-    "content": "This is the work content of the first note.",
-    "tags": [""]
-}
-###
-POST http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
-Content-Type: application/json
-
-{
-    "title": "Note2",
-    "content": "This note should be added to personal tag.",
-    "tags": ["personal"]
+  "title": "dt",
+  "content": "This is the content of my dbms note.",
+  "tags": ["personal"],
+  "password": "vignesh"
 }
 
-### -> Get All Notes for Logged-In User 
+### Get all notes for the logged-in user (Protected)
 GET http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
-
-### Fetch Notes with "Personal" Tag
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1OTI0MzQsImV4cCI6MTcyNTY3ODgzNH0._aR5OpE8SQgzQEUt4TdhC2oizzIxFsH6pTbGoKEyqB0
+### Fetch notes with a specific tag (Protected)
 GET http://localhost:3000/user-api/users/notes/tag/personal
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
-### Fetch Notes with "Work" Tag
-GET http://localhost:3000/user-api/users/notes/tag/work
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1OTI0MzQsImV4cCI6MTcyNTY3ODgzNH0._aR5OpE8SQgzQEUt4TdhC2oizzIxFsH6pTbGoKEyqB0
 
-### Mark Note as Favorite
-PUT http://localhost:3000/user-api/users/notes/favorite/2024-08-22T14:50:37.330Z
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
 
-### Unmark Note as Favorite
-PUT http://localhost:3000/user-api/users/notes/unfavorite/2024-08-22T14:50:37.330Z
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+### Mark a note as favorite (Protected)
+  PUT http://localhost:3000/user-api/users/notes/favorite/2024-09-01T06:22:40.090Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
 
-### Fetch Favorite Notes
-GET http://localhost:3000/user-api/users/notes/favorites
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+### Unmark a note as favorite (Protected)
+PUT http://localhost:3000/user-api/users/notes/unfavorite/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
+### Move a note to the recycle bin (Protected)
+PUT http://localhost:3000/user-api/users/notes/delete/2024-08-24T09:18:18.051Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI0NDkxMDQzLCJleHAiOjE3MjQ0OTQ2NDN9.bG3yp4NFhsQSFKTfk-S9taxPTy5c9UgVYYaFIfPzXIs
 
-### Delete Note (move to recycle bin)
-PUT http://localhost:3000/user-api/users/notes/delete/2024-08-22T14:50:37.330Z
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
 
-### Get Notes in Recycle Bin
+### Get all notes in the recycle bin (Protected)
 GET http://localhost:3000/user-api/users/notes/recycle-bin
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI0NDkxMDQzLCJleHAiOjE3MjQ0OTQ2NDN9.bG3yp4NFhsQSFKTfk-S9taxPTy5c9UgVYYaFIfPzXIs
 
-### Undo Delete (Restore Note from Recycle Bin)
-PUT http://localhost:3000/user-api/users/notes/undo-delete/2024-08-22T14:50:37.330Z
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZha3J1IiwiaWF0IjoxNzI0MzM4MDk0LCJleHAiOjE3MjQzNDE2OTR9.iY-yDbEyRLLFeZ9Q_BkyHkUdPkp6L_5tPnwyJ9FzuKM
+
+### Undo delete (restore a note from recycle bin) (Protected)
+PUT http://localhost:3000/user-api/users/notes/undo-delete/2024-08-24T09:18:18.051Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI0NDkxMDQzLCJleHAiOjE3MjQ0OTQ2NDN9.bG3yp4NFhsQSFKTfk-S9taxPTy5c9UgVYYaFIfPzXIs
+
+### Fetch all favorite notes for the logged-in user (Protected)
+GET http://localhost:3000/user-api/users/notes/favorites
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1OTI0MzQsImV4cCI6MTcyNTY3ODgzNH0._aR5OpE8SQgzQEUt4TdhC2oizzIxFsH6pTbGoKEyqB0
+
+### Get the username of the current logged-in user (Protected)
+GET http://localhost:3000/user-api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
+###
+GET http://localhost:3000/user-api/users/notes/2024-08-30T14:14:07.198Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
+
+### Update a note (Protected)
+PUT http://localhost:3000/user-api/users/notes/2024-09-05T14:19:13.810Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1NDU5MzcsImV4cCI6MTcyNTYzMjMzN30.bVUJw5XnXQGKADEng4ytt_tKGtOWXjdcgb-_QGGBQXQ
+Content-Type: application/json
+
+{
+  "title": "Updated Note Title",
+  "content": "This is the updated content of my note.",
+  "tags": ["work"]
+}

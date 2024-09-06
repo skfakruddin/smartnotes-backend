@@ -2,15 +2,17 @@ const exp = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const tokenVerify = require('../middlewares/tokenVerify');
+const saltRounds = 10;
 
+// Initialize the Express Router
 const userAPI = exp.Router();
 
 // Secret key for JWT
 const secretKey = process.env.SECRET || 'your_secret_key_here';
 
-// Create a new user
+// Create a new user with note password
 userAPI.post('/users', async (req, res) => {
-    const { name, username, password, email } = req.body;
+    const { name, username, password, email, notesPassword, confirmNotesPassword } = req.body;
     const usersCollection = req.app.get('usersCollection');
 
     try {
@@ -20,11 +22,17 @@ userAPI.post('/users', async (req, res) => {
             return res.status(400).send({ message: 'Username already exists' });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Check if notes passwords match
+        if (notesPassword !== confirmNotesPassword) {
+            return res.status(400).send({ message: 'Notes password and confirmation do not match' });
+        }
+
+        // Hash the passwords
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const hashedNotesPassword = await bcrypt.hash(notesPassword, saltRounds);
 
         // Insert the new user into the collection
-        const newUser = { name, username, password: hashedPassword, email, notes: [] };
+        const newUser = { name, username, password: hashedPassword, email, notesPassword: hashedNotesPassword, notes: [] };
         await usersCollection.insertOne(newUser);
 
         res.status(201).send({ message: 'User created successfully' });
@@ -52,7 +60,7 @@ userAPI.post('/users/login', async (req, res) => {
         }
 
         // Generate a JWT token
-        const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1h' });
+        const token = jwt.sign({ username: user.username }, secretKey, { expiresIn: '1d' });
 
         res.status(200).send({ message: 'Login successful', token });
     } catch (error) {
@@ -74,27 +82,38 @@ userAPI.get('/users', tokenVerify, async (req, res) => {
 
 // Create a new note for the logged-in user
 userAPI.post('/users/notes', tokenVerify, async (req, res) => {
-    const { title, content, tags } = req.body;
+    const { title, noteId, content, tags, password } = req.body;
+    console.log('req.body: ', req.body);
     const usersCollection = req.app.get('usersCollection');
 
     try {
         // Find the logged-in user
         const user = await usersCollection.findOne({ username: req.user.username });
+        console.log('user: ', user);
 
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
 
+        // Check if the password is correct, if provided
+        if (password) {
+            const isPasswordMatch = await bcrypt.compare(password, user.notesPassword);
+            if (!isPasswordMatch) {
+                return res.status(403).send({ message: 'Invalid notes password' });
+            }
+        }
+
         // Create the note and add it to the user's notes array
         const newNote = {
-            noteId: new Date().toISOString(),
-            title,
-            content,
-            tags,
+            noteId: noteId || new Date().toISOString(),
+            title: title || '',
+            content: content || '',
+            tags: tags || [],
             isFavorite: false,
             isDeleted: false,
             deletedAt: null
         };
+
         const updatedNotes = [...user.notes, newNote];
 
         // Update the user's notes array in the database
@@ -105,6 +124,59 @@ userAPI.post('/users/notes', tokenVerify, async (req, res) => {
         res.status(500).send({ message: 'Error creating note', error: error.message });
     }
 });
+// Update an existing note for the logged-in user
+userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
+    const { noteId } = req.params;
+    const { title, content, tags, password } = req.body;
+    const usersCollection = req.app.get('usersCollection');
+
+    try {
+        // Find the logged-in user
+        const user = await usersCollection.findOne({ username: req.user.username });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        // Find the note to update
+        const noteIndex = user.notes.findIndex(note => note.noteId === noteId && !note.isDeleted);
+
+        if (noteIndex === -1) {
+            return res.status(404).send({ message: 'Note not found or is in the recycle bin' });
+        }
+
+        // Check if the password is correct, if provided
+        if (password) {
+            const isPasswordMatch = await bcrypt.compare(password, user.notesPassword);
+            if (!isPasswordMatch) {
+                return res.status(403).send({ message: 'Invalid notes password' });
+            }
+        }
+
+        // Update the note
+        const updatedNote = {
+            ...user.notes[noteIndex],
+            title: title || user.notes[noteIndex].title,
+            content: content || user.notes[noteIndex].content,
+            tags: tags || user.notes[noteIndex].tags
+        };
+
+        // Update the notes array
+        const updatedNotes = [
+            ...user.notes.slice(0, noteIndex),
+            updatedNote,
+            ...user.notes.slice(noteIndex + 1)
+        ];
+
+        // Save the updated notes array back to the database
+        await usersCollection.updateOne({ username: req.user.username }, { $set: { notes: updatedNotes } });
+
+        res.status(200).send({ message: 'Note updated successfully', note: updatedNote });
+    } catch (error) {
+        res.status(500).send({ message: 'Error updating note', error: error.message });
+    }
+});
+
 
 // Fetch all notes for the logged-in user
 userAPI.get('/users/notes', tokenVerify, async (req, res) => {
@@ -139,10 +211,8 @@ userAPI.get('/users/notes/tag/:tag', tokenVerify, async (req, res) => {
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
-
         // Filter notes by tag and exclude deleted notes
         const filteredNotes = user.notes.filter(note => note.tags.includes(tag) && !note.isDeleted);
-
         res.status(200).send(filteredNotes);
     } catch (error) {
         res.status(500).send({ message: 'Error fetching notes', error: error.message });
@@ -239,16 +309,16 @@ userAPI.get('/users/notes/recycle-bin', tokenVerify, async (req, res) => {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Filter notes to get those in the recycle bin
-        const recycleBinNotes = user.notes.filter(note => note.isDeleted);
+        // Filter notes that are in the recycle bin
+        const deletedNotes = user.notes.filter(note => note.isDeleted);
 
-        res.status(200).send(recycleBinNotes);
+        res.status(200).send(deletedNotes);
     } catch (error) {
-        res.status(500).send({ message: 'Error fetching recycle bin notes', error: error.message });
+        res.status(500).send({ message: 'Error fetching deleted notes', error: error.message });
     }
 });
 
-// Restore a note from the recycle bin
+// Undo delete (restore a note from recycle bin)
 userAPI.put('/users/notes/undo-delete/:noteId', tokenVerify, async (req, res) => {
     const { noteId } = req.params;
     const usersCollection = req.app.get('usersCollection');
@@ -261,7 +331,7 @@ userAPI.put('/users/notes/undo-delete/:noteId', tokenVerify, async (req, res) =>
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Update the note to restore it
+        // Update the note to restore it from the recycle bin
         const updatedNotes = user.notes.map(note =>
             note.noteId === noteId ? { ...note, isDeleted: false, deletedAt: null } : note
         );
@@ -286,7 +356,7 @@ userAPI.get('/users/notes/favorites', tokenVerify, async (req, res) => {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Filter notes to get those marked as favorite
+        // Filter notes that are marked as favorite and not in the recycle bin
         const favoriteNotes = user.notes.filter(note => note.isFavorite && !note.isDeleted);
 
         res.status(200).send(favoriteNotes);
@@ -295,4 +365,49 @@ userAPI.get('/users/notes/favorites', tokenVerify, async (req, res) => {
     }
 });
 
+// Get the username of the current logged-in user
+userAPI.get('/users/me', tokenVerify, async (req, res) => {
+    try {
+        // The username is available from the tokenVerify middleware
+        const username = req.user.username;
+
+        if (!username) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        res.status(200).send({ username });
+    } catch (error) {
+        res.status(500).send({ message: 'Error fetching user', error: error.message });
+    }
+});
+
+// Fetch a note by noteId for the logged-in user
+userAPI.get('/users/notes/:noteId', tokenVerify, async (req, res) => {
+    const { noteId } = req.params;
+    const usersCollection = req.app.get('usersCollection');
+
+    try {
+        // Find the logged-in user
+        const user = await usersCollection.findOne({ username: req.user.username });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        // Find the note with the specified noteId
+        const note = user.notes.find(note => note.noteId === noteId);
+
+        if (!note || note.isDeleted) {
+            return res.status(404).send({ message: 'Note not found or is in the recycle bin' });
+        }
+
+        res.status(200).send(note);
+    } catch (error) {
+        res.status(500).send({ message: 'Error fetching note', error: error.message });
+    }
+});
+
 module.exports = userAPI;
+
+
+
