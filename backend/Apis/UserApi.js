@@ -407,6 +407,32 @@ userAPI.get('/users/notes/:noteId', tokenVerify, async (req, res) => {
     }
 });
 
+// Permanently delete a note for the logged-in user
+userAPI.delete('/users/notes/permanent-delete/:noteId', tokenVerify, async (req, res) => {
+    const { noteId } = req.params;
+    const usersCollection = req.app.get('usersCollection');
+
+    try {
+        // Find the logged-in user
+        const user = await usersCollection.findOne({ username: req.user.username });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        // Filter out the note to permanently delete it
+        const updatedNotes = user.notes.filter(note => note.noteId !== noteId);
+
+        // Update the user's notes array in the database
+        await usersCollection.updateOne({ username: req.user.username }, { $set: { notes: updatedNotes } });
+
+        res.status(200).send({ message: 'Note permanently deleted' });
+    } catch (error) {
+        res.status(500).send({ message: 'Error deleting note permanently', error: error.message });
+    }
+});
+
+
 module.exports = userAPI;
 
 

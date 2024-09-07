@@ -26,22 +26,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ
 
 ### Create a new note (Protected)
 POST http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1NDU5MzcsImV4cCI6MTcyNTYzMjMzN30.bVUJw5XnXQGKADEng4ytt_tKGtOWXjdcgb-_QGGBQXQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU3MDkyNzMsImV4cCI6MTcyNTc5NTY3M30.i54kayCczNcHkFAt5K4KnO8EOzrHcMYmtpecv4Sts8c
 Content-Type: application/json
 
 {
-  "title": "dt",
-  "content": "This is the content of my dbms note.",
-  "tags": ["personal"],
+  "title": "sv",
+  "content": "This is the content of my sv note.",
+  "tags": ["Work"],
   "password": "vignesh"
 }
 
 ### Get all notes for the logged-in user (Protected)
 GET http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1OTI0MzQsImV4cCI6MTcyNTY3ODgzNH0._aR5OpE8SQgzQEUt4TdhC2oizzIxFsH6pTbGoKEyqB0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTMxMzcsImV4cCI6MTcyNTc3OTUzN30.zsweHOjSFmAc5J1sOh7CXNgZSWHqPe8hnLA0C6LIrGA
 ### Fetch notes with a specific tag (Protected)
-GET http://localhost:3000/user-api/users/notes/tag/personal
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1OTI0MzQsImV4cCI6MTcyNTY3ODgzNH0._aR5OpE8SQgzQEUt4TdhC2oizzIxFsH6pTbGoKEyqB0
+GET http://localhost:3000/user-api/users/notes/tag/Work
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTYwMjIsImV4cCI6MTcyNTc4MjQyMn0.vaFTVNdlWJcsi-CAWnGYvriRM93Htjri3dsq59lm_5M
 
 
 ### Mark a note as favorite (Protected)
@@ -86,3 +86,9 @@ Content-Type: application/json
   "content": "This is the updated content of my note.",
   "tags": ["work"]
 }
+
+### Permanently Delete a Note
+DELETE http://localhost:3000/user-api/users/notes/permanent-delete/2024-09-05T14:19:22.691Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTMxMzcsImV4cCI6MTcyNTc3OTUzN30.zsweHOjSFmAc5J1sOh7CXNgZSWHqPe8hnLA0C6LIrGA
+
+Content-Type: application/json
