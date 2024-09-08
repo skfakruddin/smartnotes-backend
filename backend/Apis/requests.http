@@ -17,12 +17,12 @@ Content-Type: application/json
 
 {
   "username": "vignesh",
-  "password": "vignesh"
+  "password": "aditya"
 }
 
 ### Get all users (Protected)
 GET http://localhost:3000/user-api/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU3OTc5ODUsImV4cCI6MTcyNTg4NDM4NX0.My5p0TZ4zBcbS0SUzOaUSYaVRqhkEuE_reYpSctu56E
 
 ### Create a new note (Protected)
 POST http://localhost:3000/user-api/users/notes
@@ -92,3 +92,26 @@ DELETE http://localhost:3000/user-api/users/notes/permanent-delete/2024-09-05T14
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTMxMzcsImV4cCI6MTcyNTc3OTUzN30.zsweHOjSFmAc5J1sOh7CXNgZSWHqPe8hnLA0C6LIrGA
 
 Content-Type: application/json
+
+### Change Notes Password
+### Change Notes Password
+PUT http://localhost:3000/user-api/users/change-notes-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU3ODAwMzQsImV4cCI6MTcyNTg2NjQzNH0.U0aTsLzv5Ssa4vY09MYAPme7P1PiCHR-VOzJqUt58Io
+Content-Type: application/json
+
+{
+    "oldPassword": "fakru",
+    "newPassword": "vignesh",
+    "confirmNewPassword": "vignesh"
+}
+
+### Change User Password
+PUT http://localhost:3000/user-api/users/change-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU3ODAwMzQsImV4cCI6MTcyNTg2NjQzNH0.U0aTsLzv5Ssa4vY09MYAPme7P1PiCHR-VOzJqUt58Io
+Content-Type: application/json
+
+{
+  "oldPassword": "aditya",
+  "newPassword": "aditya",
+  "confirmNewPassword": "aditya"
+}

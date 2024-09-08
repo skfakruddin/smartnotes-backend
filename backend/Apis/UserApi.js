@@ -41,6 +41,109 @@ userAPI.post('/users', async (req, res) => {
     }
 });
 
+// changing notes password
+userAPI.put('/users/change-notes-password', tokenVerify, async (req, res) => {
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+    const username = req.user.username;
+    const usersCollection = req.app.get('usersCollection');
+    console.log('Authorization Header:', req.headers['authorization']);
+    console.log('Request Body:', req.body);
+
+    try {
+        // Find the logged-in user
+        const user = await usersCollection.findOne({ username });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        // Verify old password
+        const isMatch = await bcrypt.compare(oldPassword, user.notesPassword);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // Check if new passwords match
+        if (newPassword !== confirmNewPassword) {
+            return res.status(400).json({ message: 'New password and confirmation do not match' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update the user's notes password
+        const result = await usersCollection.updateOne(
+            { username },
+            { $set: { notesPassword: hashedPassword } }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(500).json({ message: 'Failed to update password' });
+        }
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Server Error:', error); // Improved logging
+        res.status(500).json({ message: 'Failed to update password', error: error.message });
+    }
+});
+//changing password of user
+userAPI.put('/users/change-password', tokenVerify, async (req, res) => {
+    const { oldPass, newPass, confirmNewPass } = req.body;
+    const username = req.user.username;
+    const usersCollection = req.app.get('usersCollection');
+
+    console.log('Request Headers:', req.headers);
+    console.log('Request Body:', req.body);
+    console.log('Username from Token:', username);
+
+    try {
+        // Check if user is found
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+            console.log('User not found:', username);
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify the old password
+        const isMatch = await bcrypt.compare(oldPass, user.password);
+        if (!isMatch) {
+            console.log('Old password does not match for user:', username);
+            return res.status(400).json({ message: 'Old password is incorrect' });
+        }
+
+        // Check if new password and confirmation match
+        if (newPass !== confirmNewPass) {
+            console.log('New password and confirmation do not match');
+            return res.status(400).json({ message: 'New password and confirmation do not match' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPass, saltRounds);
+
+        // Update the user's password
+        const result = await usersCollection.updateOne(
+            { username },
+            { $set: { password: hashedPassword } }
+        );
+
+        console.log('Update Result:', result);
+
+        // Check if the password was updated successfully
+        if (result.modifiedCount === 0) {
+            console.log('Failed to update password for user:', username);
+            return res.status(500).json({ message: 'Failed to update password' });
+        }
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Server Error:', error);
+        res.status(500).json({ message: 'Failed to update password', error: error.message });
+    }
+});
+
+
+
 // Login user and generate a JWT
 userAPI.post('/users/login', async (req, res) => {
     const { username, password } = req.body;
@@ -431,6 +534,7 @@ userAPI.delete('/users/notes/permanent-delete/:noteId', tokenVerify, async (req,
         res.status(500).send({ message: 'Error deleting note permanently', error: error.message });
     }
 });
+
 
 
 module.exports = userAPI;
