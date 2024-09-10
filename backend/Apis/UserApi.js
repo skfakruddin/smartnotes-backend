@@ -12,7 +12,7 @@ const secretKey = process.env.SECRET || 'your_secret_key_here';
 
 // Create a new user with note password
 userAPI.post('/users', async (req, res) => {
-    const { name, username, password, email, notesPassword, confirmNotesPassword } = req.body;
+    const {  username, password, email, notesPassword, confirmNotesPassword } = req.body;
     const usersCollection = req.app.get('usersCollection');
 
     try {
@@ -32,7 +32,7 @@ userAPI.post('/users', async (req, res) => {
         const hashedNotesPassword = await bcrypt.hash(notesPassword, saltRounds);
 
         // Insert the new user into the collection
-        const newUser = { name, username, password: hashedPassword, email, notesPassword: hashedNotesPassword, notes: [] };
+        const newUser = {  username, password: hashedPassword, email, notesPassword: hashedNotesPassword, notes: [] };
         await usersCollection.insertOne(newUser);
 
         res.status(201).send({ message: 'User created successfully' });
@@ -139,6 +139,54 @@ userAPI.put('/users/change-password', tokenVerify, async (req, res) => {
     } catch (error) {
         console.error('Server Error:', error);
         res.status(500).json({ message: 'Failed to update password', error: error.message });
+    }
+});
+
+// Get user profile including notesPassword (for verification purposes)
+userAPI.get('/users/profile', tokenVerify, async (req, res) => {
+    const username = req.user.username;
+    const usersCollection = req.app.get('usersCollection');
+
+    try {
+        const user = await usersCollection.findOne({ username }, { projection: { notesPassword: 1 } });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, notesPassword: user.notesPassword });
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).json({ success: false, message: 'Error fetching user data', error: error.message });
+    }
+});
+
+// Verify if entered password matches stored notesPassword
+userAPI.post('/users/notes/verify-password', tokenVerify, async (req, res) => {
+    const { password, notesPassword } = req.body;
+
+    console.log('Entered password:', password); // Debug log
+    console.log('Stored notesPassword:', notesPassword); // Debug log
+
+    try {
+        // Check if passwords are provided
+        if (!password || !notesPassword) {
+            return res.status(400).json({ success: false, message: 'Missing password fields' });
+        }
+
+        // Verify the provided password with the stored notesPassword
+        const isPasswordMatch = await bcrypt.compare(password, notesPassword);
+        
+        // Log the result of password comparison
+        console.log('Password match result:', isPasswordMatch); // Debug log
+
+        if (!isPasswordMatch) {
+            return res.status(400).json({ success: false, message: 'Incorrect password' });
+        }
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Error verifying password:', error);
+        res.status(500).json({ success: false, message: 'Error verifying password', error: error.message });
     }
 });
 

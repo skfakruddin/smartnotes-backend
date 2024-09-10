@@ -3,7 +3,6 @@ POST http://localhost:3000/user-api/users
 Content-Type: application/json
 
 {
-  "name": "John Doe",
   "username": "john_doe",
   "password": "password123",
   "email": "johndoe@example.com",
@@ -16,29 +15,27 @@ POST http://localhost:3000/user-api/users/login
 Content-Type: application/json
 
 {
-  "username": "vignesh",
-  "password": "aditya"
+  "username": "nurjahan",
+  "password": "nurja"
 }
 
 ### Get all users (Protected)
 GET http://localhost:3000/user-api/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU3OTc5ODUsImV4cCI6MTcyNTg4NDM4NX0.My5p0TZ4zBcbS0SUzOaUSYaVRqhkEuE_reYpSctu56E
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI1ODkzMjMxLCJleHAiOjE3MjU5Nzk2MzF9.GXLChFw4Nu_H91rdMLNCl_syeHqvDKxx1VmeiinWcLU
 ### Create a new note (Protected)
 POST http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU3MDkyNzMsImV4cCI6MTcyNTc5NTY3M30.i54kayCczNcHkFAt5K4KnO8EOzrHcMYmtpecv4Sts8c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI1ODkzMjU5LCJleHAiOjE3MjU5Nzk2NTl9.lOmQmS_BKH7eumz_4E5styttZLnKlkhzoaCtbVQO-N4
 Content-Type: application/json
 
 {
   "title": "sv",
   "content": "This is the content of my sv note.",
-  "tags": ["Work"],
-  "password": "vignesh"
+  "tags": ["Work"]
 }
 
 ### Get all notes for the logged-in user (Protected)
 GET http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTMxMzcsImV4cCI6MTcyNTc3OTUzN30.zsweHOjSFmAc5J1sOh7CXNgZSWHqPe8hnLA0C6LIrGA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im51cmphaGFuIiwiaWF0IjoxNzI1OTMzMDI1LCJleHAiOjE3MjYwMTk0MjV9.qdcYg2eIYcg5n5v-1CbYgaUnx5gtQADy6oNmMmzPhMk
 ### Fetch notes with a specific tag (Protected)
 GET http://localhost:3000/user-api/users/notes/tag/Work
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTYwMjIsImV4cCI6MTcyNTc4MjQyMn0.vaFTVNdlWJcsi-CAWnGYvriRM93Htjri3dsq59lm_5M
@@ -115,3 +112,17 @@ Content-Type: application/json
   "newPassword": "aditya",
   "confirmNewPassword": "aditya"
 }
+###
+GET http://localhost:3000/user-api/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI1ODkyNzE5LCJleHAiOjE3MjU5NzkxMTl9.9Xr0mYG-Zet81Hg4cKGC_lFwciChBMChouv4xOq8uMc
+### Unlock a Note
+POST http://localhost:3000/user-api/users/notes/verify-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5fZG9lIiwiaWF0IjoxNzI1ODkyNzE5LCJleHAiOjE3MjU5NzkxMTl9.9Xr0mYG-Zet81Hg4cKGC_lFwciChBMChouv4xOq8uMc
+Content-Type: application/json
+
+{
+    "password": "password123",
+    "notesPassword": "note123"
+}
+
+
