@@ -276,9 +276,10 @@ userAPI.post('/users/notes', tokenVerify, async (req, res) => {
     }
 });
 // Update an existing note for the logged-in user
+
 userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
     const { noteId } = req.params;
-    const { title, content, tags, password } = req.body;
+    const { title, content, tags, password, formatting } = req.body;  // Add `formatting` to the request body
     const usersCollection = req.app.get('usersCollection');
 
     try {
@@ -304,12 +305,13 @@ userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
             }
         }
 
-        // Update the note
+        // Update the note with formatting properties
         const updatedNote = {
             ...user.notes[noteIndex],
             title: title || user.notes[noteIndex].title,
             content: content || user.notes[noteIndex].content,
-            tags: tags || user.notes[noteIndex].tags
+            tags: tags || user.notes[noteIndex].tags,
+            formatting: formatting || user.notes[noteIndex].formatting // Save formatting properties
         };
 
         // Update the notes array
@@ -327,6 +329,8 @@ userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
         res.status(500).send({ message: 'Error updating note', error: error.message });
     }
 });
+
+
 
 
 // Fetch all notes for the logged-in user

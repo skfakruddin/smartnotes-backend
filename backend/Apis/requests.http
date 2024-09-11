@@ -35,7 +35,7 @@ Content-Type: application/json
 
 ### Get all notes for the logged-in user (Protected)
 GET http://localhost:3000/user-api/users/notes
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im51cmphaGFuIiwiaWF0IjoxNzI1OTMzMDI1LCJleHAiOjE3MjYwMTk0MjV9.qdcYg2eIYcg5n5v-1CbYgaUnx5gtQADy6oNmMmzPhMk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im51cmphaGFuIiwiaWF0IjoxNzI2MDcyMDg4LCJleHAiOjE3MjYxNTg0ODh9.LO_oA7AP9p2MnSD2_2hbO9-3hOJG3eRt-yklGmbmhNY
 ### Fetch notes with a specific tag (Protected)
 GET http://localhost:3000/user-api/users/notes/tag/Work
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU2OTYwMjIsImV4cCI6MTcyNTc4MjQyMn0.vaFTVNdlWJcsi-CAWnGYvriRM93Htjri3dsq59lm_5M
@@ -74,12 +74,12 @@ GET http://localhost:3000/user-api/users/notes/2024-08-30T14:14:07.198Z
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjUxOTI0MjUsImV4cCI6MTcyNTE5NjAyNX0.MCla2g4KXPnFgPzlkNLbytbZgegws8RDGi3Rg8BwX1k
 
 ### Update a note (Protected)
-PUT http://localhost:3000/user-api/users/notes/2024-09-05T14:19:13.810Z
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InZpZ25lc2giLCJpYXQiOjE3MjU1NDU5MzcsImV4cCI6MTcyNTYzMjMzN30.bVUJw5XnXQGKADEng4ytt_tKGtOWXjdcgb-_QGGBQXQ
+PUT http://localhost:3000/user-api/users/notes/2024-09-10T01:40:50.065Z
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im51cmphaGFuIiwiaWF0IjoxNzI2MDcyMDg4LCJleHAiOjE3MjYxNTg0ODh9.LO_oA7AP9p2MnSD2_2hbO9-3hOJG3eRt-yklGmbmhNY
 Content-Type: application/json
 
 {
-  "title": "Updated Note Title",
+  "title": "Updated dbms",
   "content": "This is the updated content of my note.",
   "tags": ["work"]
 }
