@@ -1,8 +1,25 @@
 const exp = require('express');
+const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
 const tokenVerify = require('../middlewares/tokenVerify');
 const saltRounds = 10;
+
+// Initialize Express
+const app = exp();
+
+// Adjust body-parser limits
+app.use(bodyParser.json({ limit: '100mb' })); // Adjust as needed
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
+
+// Configure Multer
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 100 * 1024 * 1024 }, // Adjust the size limit
+});
+
 
 // Initialize the Express Router
 const userAPI = exp.Router();
@@ -232,15 +249,14 @@ userAPI.get('/users', tokenVerify, async (req, res) => {
 });
 
 // Create a new note for the logged-in user
+// Create a new note for the logged-in user
 userAPI.post('/users/notes', tokenVerify, async (req, res) => {
     const { title, noteId, content, tags, password } = req.body;
-    console.log('req.body: ', req.body);
     const usersCollection = req.app.get('usersCollection');
 
     try {
         // Find the logged-in user
         const user = await usersCollection.findOne({ username: req.user.username });
-        console.log('user: ', user);
 
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
@@ -262,7 +278,8 @@ userAPI.post('/users/notes', tokenVerify, async (req, res) => {
             tags: tags || [],
             isFavorite: false,
             isDeleted: false,
-            deletedAt: null
+            deletedAt: null,
+            lastAccessed: new Date() // Set lastAccessed to the current date
         };
 
         const updatedNotes = [...user.notes, newNote];
@@ -275,11 +292,14 @@ userAPI.post('/users/notes', tokenVerify, async (req, res) => {
         res.status(500).send({ message: 'Error creating note', error: error.message });
     }
 });
+
+
 // Update an existing note for the logged-in user
 
+// Update an existing note for the logged-in user
 userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
     const { noteId } = req.params;
-    const { title, content, tags, password, formatting } = req.body;  // Add `formatting` to the request body
+    const { title, content, tags, password } = req.body; 
     const usersCollection = req.app.get('usersCollection');
 
     try {
@@ -305,13 +325,13 @@ userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
             }
         }
 
-        // Update the note with formatting properties
+        // Update the note
         const updatedNote = {
             ...user.notes[noteIndex],
             title: title || user.notes[noteIndex].title,
             content: content || user.notes[noteIndex].content,
             tags: tags || user.notes[noteIndex].tags,
-            formatting: formatting || user.notes[noteIndex].formatting // Save formatting properties
+            lastAccessed: new Date() // Update lastAccessed to the current date
         };
 
         // Update the notes array
@@ -329,6 +349,8 @@ userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
         res.status(500).send({ message: 'Error updating note', error: error.message });
     }
 });
+
+
 
 
 
@@ -584,6 +606,71 @@ userAPI.delete('/users/notes/permanent-delete/:noteId', tokenVerify, async (req,
         res.status(200).send({ message: 'Note permanently deleted' });
     } catch (error) {
         res.status(500).send({ message: 'Error deleting note permanently', error: error.message });
+    }
+});
+
+// Route to get recent notes
+// Route to get recent notes
+
+userAPI.get('/users/recent-notes', tokenVerify, async (req, res) => {
+    const usersCollection = req.app.get('usersCollection');
+    const username = req.user.username;
+
+    try {
+        // Find the logged-in user
+        const user = await usersCollection.findOne({ username });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        // Map notes and ensure lastAccessed is a valid Date object
+        const notesWithAccess = user.notes.map(note => ({
+            ...note,
+            lastAccessed: note.lastAccessed ? new Date(note.lastAccessed) : new Date(0) // Default to epoch if missing
+        }));
+
+        // Filter valid notes with proper dates and sort by most recent last accessed time
+        const recentNotes = notesWithAccess
+            .filter(note => note.lastAccessed && note.lastAccessed instanceof Date && !isNaN(note.lastAccessed.getTime()))
+            .sort((a, b) => b.lastAccessed - a.lastAccessed) // Sort by descending order of lastAccessed
+            .slice(0, 10); // Return the top 5 recent notes
+
+        res.status(200).send(recentNotes);
+    } catch (err) {
+        res.status(500).send({ message: 'Error fetching recent notes', error: err.message });
+    }
+});
+
+
+
+// Example route to get a specific note and update the last accessed time
+userAPI.get('/users/notes/:noteId', tokenVerify, async (req, res) => {
+    const usersCollection = req.app.get('usersCollection');
+    const username = req.user.username;
+    const { noteId } = req.params;
+
+    try {
+        // Find the user and the specific note by noteId
+        const user = await usersCollection.findOne({ username, "notes.noteId": noteId });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User or Note not found' });
+        }
+
+        // Update the lastAccessed field for the specific note
+        await usersCollection.updateOne(
+            { username, "notes.noteId": noteId },
+            { $set: { "notes.$.lastAccessed": new Date() } } // Set the current date/time
+        );
+
+        // Fetch the updated note
+        const updatedUser = await usersCollection.findOne({ username });
+        const note = updatedUser.notes.find(n => n.noteId === noteId);
+
+        res.status(200).send(note);
+    } catch (err) {
+        res.status(500).send({ message: 'Error fetching or updating the note', error: err.message });
     }
 });
 

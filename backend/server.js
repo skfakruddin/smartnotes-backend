@@ -8,11 +8,11 @@ const app = exp();
 app.use(cors({ origin: '*' }));
 app.use(exp.json());
 
-const dbURL = 'mongodb://127.0.0.1:27017';
+const dbURL = process.env.DB_URL;
 const mc = new MongoClient(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
 
 mc.connect().then(connectionObject => {
-    const companyDatabase = connectionObject.db('Company');
+    const companyDatabase = connectionObject.db('Notes');
     const usersCollection = companyDatabase.collection('Users');
     
     app.set('usersCollection', usersCollection);
