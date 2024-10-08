@@ -7,7 +7,7 @@ const app = exp();
 
 app.use(cors({ origin: '*' }));
 app.use(exp.json());
-
+// db URL
 const dbURL = process.env.DB_URL;
 const mc = new MongoClient(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
 
