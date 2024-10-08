@@ -2,7 +2,7 @@ const exp = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
+// const multer = require('multer');
 const tokenVerify = require('../middlewares/tokenVerify');
 const saltRounds = 10;
 
@@ -14,11 +14,11 @@ app.use(bodyParser.json({ limit: '100mb' })); // Adjust as needed
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 
 // Configure Multer
-const storage = multer.memoryStorage();
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 100 * 1024 * 1024 }, // Adjust the size limit
-});
+// const storage = multer.memoryStorage(); 
+// const upload = multer({
+//     storage: storage,
+//     limits: { fileSize: 100 * 1024 * 1024 }, // Adjust the size limit
+// });
 
 
 // Initialize the Express Router
@@ -350,11 +350,6 @@ userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
     }
 });
 
-
-
-
-
-
 // Fetch all notes for the logged-in user
 userAPI.get('/users/notes', tokenVerify, async (req, res) => {
     const usersCollection = req.app.get('usersCollection');
@@ -673,6 +668,14 @@ userAPI.get('/users/notes/:noteId', tokenVerify, async (req, res) => {
         res.status(500).send({ message: 'Error fetching or updating the note', error: err.message });
     }
 });
+
+
+
+
+
+
+
+  
 
 
 

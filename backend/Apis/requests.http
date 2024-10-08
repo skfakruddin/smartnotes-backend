@@ -15,8 +15,8 @@ POST http://localhost:3000/user-api/users/login
 Content-Type: application/json
 
 {
-  "username": "nurjahan",
-  "password": "nurja"
+  "username": "shaikfakruddin",
+  "password": "fakruddin"
 }
 
 ### Get all users (Protected)
@@ -139,3 +139,7 @@ Content-Type: application/json
 GET http://localhost:3000/user-api/users/notes/2024-09-12T15:54:51.689Z
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im51cmphaGFuIiwiaWF0IjoxNzI2MjM3NDU4LCJleHAiOjE3MjYzMjM4NTh9.gF8Gaiuc9PN0ah0cCcI5fhKS9zVIqn75xQ8Tzv2bLTI
 Content-Type: application/json
+
+### Search Notes with Query 'dbms'
+GET http://localhost:3000/user-api/users/notes/search?q=dbms
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNoYWlrZmFrcnVkZGluIiwiaWF0IjoxNzI2Nzk2MjYzLCJleHAiOjE3MjY4ODI2NjN9.AJZG5863QW5jslpxiP7vOfr9nB2WiuTaS9coiyUFoGE
