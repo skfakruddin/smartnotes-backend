@@ -10,15 +10,11 @@ app.use(exp.json());
 
 const dbURL = process.env.DB_URL;
 const mc = new MongoClient(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
-
 mc.connect().then(connectionObject => {
     const companyDatabase = connectionObject.db('Notes');
-    const usersCollection = companyDatabase.collection('Users');
-    
+    const usersCollection = companyDatabase.collection('Users');    
     app.set('usersCollection', usersCollection);
-
     console.log('Connected to MongoDB');
-    
     const port = process.env.PORT || 3000;
     app.listen(port, () => {
         console.log(`Server running on port http://localhost:${port}`);
