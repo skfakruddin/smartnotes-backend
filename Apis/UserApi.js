@@ -2,9 +2,12 @@ const exp = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// const multer = require('multer');
 const tokenVerify = require('../middlewares/tokenVerify');
 const saltRounds = 10;
+const crypto = require('crypto');
+
+const ENCRYPTION_KEY = process.env.NOTE_SECRET || '12345678901234567890123456789012'; // 32 chars
+const IV_LENGTH = 16;
 
 // Initialize Express
 const app = exp();
@@ -13,20 +16,37 @@ const app = exp();
 app.use(bodyParser.json({ limit: '100mb' })); // Adjust as needed
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 
-// Configure Multer
-// const storage = multer.memoryStorage(); 
-// const upload = multer({
-//     storage: storage,
-//     limits: { fileSize: 100 * 1024 * 1024 }, // Adjust the size limit
-// });
-
-
 // Initialize the Express Router
 const userAPI = exp.Router();
 
 // Secret key for JWT
-const secretKey = process.env.SECRET || 'your_secret_key_here';
+const secretKey = process.env.JWT_SECRET || 'your_secret_key_here';
 
+
+function encrypt(text) {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv(
+        'aes-256-cbc',
+        Buffer.from(ENCRYPTION_KEY),
+        iv
+    );
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
+}
+
+function decrypt(text) {
+    const [ivHex, encryptedText] = text.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv(
+        'aes-256-cbc',
+        Buffer.from(ENCRYPTION_KEY),
+        iv
+    );
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+}
 // Create a new user with note password
 userAPI.post('/users', async (req, res) => {
     const {  username, password, email, notesPassword, confirmNotesPassword } = req.body;
@@ -110,48 +130,32 @@ userAPI.put('/users/change-password', tokenVerify, async (req, res) => {
     const username = req.user.username;
     const usersCollection = req.app.get('usersCollection');
 
-    console.log('Request Headers:', req.headers);
-    console.log('Request Body:', req.body);
-    console.log('Username from Token:', username);
-
     try {
         // Check if user is found
         const user = await usersCollection.findOne({ username });
         if (!user) {
-            console.log('User not found:', username);
             return res.status(404).json({ message: 'User not found' });
         }
 
         // Verify the old password
         const isMatch = await bcrypt.compare(oldPass, user.password);
         if (!isMatch) {
-            console.log('Old password does not match for user:', username);
             return res.status(400).json({ message: 'Old password is incorrect' });
         }
 
         // Check if new password and confirmation match
         if (newPass !== confirmNewPass) {
-            console.log('New password and confirmation do not match');
             return res.status(400).json({ message: 'New password and confirmation do not match' });
         }
-
-        // Hash the new password
         const hashedPassword = await bcrypt.hash(newPass, saltRounds);
-
-        // Update the user's password
         const result = await usersCollection.updateOne(
             { username },
             { $set: { password: hashedPassword } }
         );
-
-        console.log('Update Result:', result);
-
-        // Check if the password was updated successfully
         if (result.modifiedCount === 0) {
             console.log('Failed to update password for user:', username);
             return res.status(500).json({ message: 'Failed to update password' });
         }
-
         res.json({ message: 'Password updated successfully' });
     } catch (error) {
         console.error('Server Error:', error);
@@ -159,7 +163,6 @@ userAPI.put('/users/change-password', tokenVerify, async (req, res) => {
     }
 });
 
-// Get user profile including notesPassword (for verification purposes)
 userAPI.get('/users/profile', tokenVerify, async (req, res) => {
     const username = req.user.username;
     const usersCollection = req.app.get('usersCollection');
@@ -169,7 +172,6 @@ userAPI.get('/users/profile', tokenVerify, async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-
         res.status(200).json({ success: true, notesPassword: user.notesPassword });
     } catch (error) {
         console.error('Error fetching user data:', error);
@@ -177,24 +179,18 @@ userAPI.get('/users/profile', tokenVerify, async (req, res) => {
     }
 });
 
-// Verify if entered password matches stored notesPassword
 userAPI.post('/users/notes/verify-password', tokenVerify, async (req, res) => {
     const { password, notesPassword } = req.body;
 
-    console.log('Entered password:', password); // Debug log
-    console.log('Stored notesPassword:', notesPassword); // Debug log
-
+    console.log('Entered password:', password); 
+    console.log('Stored notesPassword:', notesPassword); 
     try {
-        // Check if passwords are provided
         if (!password || !notesPassword) {
             return res.status(400).json({ success: false, message: 'Missing password fields' });
         }
-
-        // Verify the provided password with the stored notesPassword
         const isPasswordMatch = await bcrypt.compare(password, notesPassword);
         
-        // Log the result of password comparison
-        console.log('Password match result:', isPasswordMatch); // Debug log
+        // Log the result of password comparison    
 
         if (!isPasswordMatch) {
             return res.status(400).json({ success: false, message: 'Incorrect password' });
@@ -202,7 +198,6 @@ userAPI.post('/users/notes/verify-password', tokenVerify, async (req, res) => {
 
         res.status(200).json({ success: true });
     } catch (error) {
-        console.error('Error verifying password:', error);
         res.status(500).json({ success: false, message: 'Error verifying password', error: error.message });
     }
 });
@@ -247,8 +242,6 @@ userAPI.get('/users', tokenVerify, async (req, res) => {
         res.status(500).send({ message: 'Error fetching users', error: error.message });
     }
 });
-
-// Create a new note for the logged-in user
 // Create a new note for the logged-in user
 userAPI.post('/users/notes', tokenVerify, async (req, res) => {
     const { title, noteId, content, tags, password } = req.body;
@@ -274,7 +267,7 @@ userAPI.post('/users/notes', tokenVerify, async (req, res) => {
         const newNote = {
             noteId: noteId || new Date().toISOString(),
             title: title || '',
-            content: content || '',
+           content: content ? encrypt(content) : '',
             tags: tags || [],
             isFavorite: false,
             isDeleted: false,
@@ -299,25 +292,25 @@ userAPI.post('/users/notes', tokenVerify, async (req, res) => {
 // Update an existing note for the logged-in user
 userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
     const { noteId } = req.params;
-    const { title, content, tags, password } = req.body; 
+    const { title, content, tags, password } = req.body;
     const usersCollection = req.app.get('usersCollection');
 
     try {
-        // Find the logged-in user
         const user = await usersCollection.findOne({ username: req.user.username });
 
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Find the note to update
-        const noteIndex = user.notes.findIndex(note => note.noteId === noteId && !note.isDeleted);
+        const noteIndex = user.notes.findIndex(
+            note => note.noteId === noteId && !note.isDeleted
+        );
 
         if (noteIndex === -1) {
-            return res.status(404).send({ message: 'Note not found or is in the recycle bin' });
+            return res.status(404).send({ message: 'Note not found or is in recycle bin' });
         }
 
-        // Check if the password is correct, if provided
+        // Verify notes password if provided
         if (password) {
             const isPasswordMatch = await bcrypt.compare(password, user.notesPassword);
             if (!isPasswordMatch) {
@@ -325,30 +318,48 @@ userAPI.put('/users/notes/:noteId', tokenVerify, async (req, res) => {
             }
         }
 
-        // Update the note
+        // 🔐 ENCRYPT BEFORE STORING
+        const encryptedContent = content
+            ? encrypt(content)
+            : user.notes[noteIndex].content;
+
         const updatedNote = {
             ...user.notes[noteIndex],
             title: title || user.notes[noteIndex].title,
-            content: content || user.notes[noteIndex].content,
+            content: encryptedContent,
             tags: tags || user.notes[noteIndex].tags,
-            lastAccessed: new Date() // Update lastAccessed to the current date
+            lastAccessed: new Date()
         };
 
-        // Update the notes array
         const updatedNotes = [
             ...user.notes.slice(0, noteIndex),
             updatedNote,
             ...user.notes.slice(noteIndex + 1)
         ];
 
-        // Save the updated notes array back to the database
-        await usersCollection.updateOne({ username: req.user.username }, { $set: { notes: updatedNotes } });
+        await usersCollection.updateOne(
+            { username: req.user.username },
+            { $set: { notes: updatedNotes } }
+        );
 
-        res.status(200).send({ message: 'Note updated successfully', note: updatedNote });
+        // 🔓 DECRYPT BEFORE SENDING TO FRONTEND
+        const decryptedNote = {
+            ...updatedNote,
+            content: updatedNote.content
+                ? decrypt(updatedNote.content)
+                : ''
+        };
+
+        res.status(200).send({
+            message: 'Note updated successfully',
+            note: decryptedNote
+        });
+
     } catch (error) {
         res.status(500).send({ message: 'Error updating note', error: error.message });
     }
 });
+
 
 // Fetch all notes for the logged-in user
 userAPI.get('/users/notes', tokenVerify, async (req, res) => {
@@ -365,8 +376,14 @@ userAPI.get('/users/notes', tokenVerify, async (req, res) => {
         // Filter out notes that are in the recycle bin
         const activeNotes = user.notes.filter(note => !note.isDeleted);
 
-        res.status(200).send(activeNotes);
-    } catch (error) {
+        const decryptedNotes = activeNotes.map(note => ({
+    ...note,
+    content: note.content ? decrypt(note.content) : ''
+}));
+
+res.status(200).send(decryptedNotes);
+    } 
+    catch (error) {
         res.status(500).send({ message: 'Error fetching notes', error: error.message });
     }
 });
@@ -386,7 +403,8 @@ userAPI.get('/users/notes/tag/:tag', tokenVerify, async (req, res) => {
         // Filter notes by tag and exclude deleted notes
         const filteredNotes = user.notes.filter(note => note.tags.includes(tag) && !note.isDeleted);
         res.status(200).send(filteredNotes);
-    } catch (error) {
+    }
+     catch (error) {
         res.status(500).send({ message: 'Error fetching notes', error: error.message });
     }
 });
@@ -493,7 +511,7 @@ userAPI.get('/users/notes/recycle-bin', tokenVerify, async (req, res) => {
 // Undo delete (restore a note from recycle bin)
 userAPI.put('/users/notes/undo-delete/:noteId', tokenVerify, async (req, res) => {
     const { noteId } = req.params;
-    const usersCollection = req.app.get('usersCollection');
+    const usersCollection = req.app.get('usersCollection');a
 
     try {
         // Find the logged-in user
@@ -559,21 +577,25 @@ userAPI.get('/users/notes/:noteId', tokenVerify, async (req, res) => {
     const usersCollection = req.app.get('usersCollection');
 
     try {
-        // Find the logged-in user
         const user = await usersCollection.findOne({ username: req.user.username });
 
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Find the note with the specified noteId
-        const note = user.notes.find(note => note.noteId === noteId);
+        const note = user.notes.find(n => n.noteId === noteId && !n.isDeleted);
 
         if (!note || note.isDeleted) {
-            return res.status(404).send({ message: 'Note not found or is in the recycle bin' });
+            return res.status(404).send({ message: 'Note not found' });
         }
 
-        res.status(200).send(note);
+        const decryptedNote = {
+            ...note,
+            content: note.content ? decrypt(note.content) : ''
+        };
+
+        res.status(200).send(decryptedNote);
+
     } catch (error) {
         res.status(500).send({ message: 'Error fetching note', error: error.message });
     }
@@ -629,7 +651,7 @@ userAPI.get('/users/recent-notes', tokenVerify, async (req, res) => {
         const recentNotes = notesWithAccess
             .filter(note => note.lastAccessed && note.lastAccessed instanceof Date && !isNaN(note.lastAccessed.getTime()))
             .sort((a, b) => b.lastAccessed - a.lastAccessed) // Sort by descending order of lastAccessed
-            .slice(0, 10); // Return the top 5 recent notes
+            .slice(0, 10); // Return the top 10 recent notes
 
         res.status(200).send(recentNotes);
     } catch (err) {
@@ -646,26 +668,44 @@ userAPI.get('/users/notes/:noteId', tokenVerify, async (req, res) => {
     const { noteId } = req.params;
 
     try {
-        // Find the user and the specific note by noteId
-        const user = await usersCollection.findOne({ username, "notes.noteId": noteId });
+        // Find the user and note
+        const user = await usersCollection.findOne({
+            username,
+            "notes.noteId": noteId
+        });
 
         if (!user) {
             return res.status(404).send({ message: 'User or Note not found' });
         }
 
-        // Update the lastAccessed field for the specific note
+        // Update lastAccessed
         await usersCollection.updateOne(
             { username, "notes.noteId": noteId },
-            { $set: { "notes.$.lastAccessed": new Date() } } // Set the current date/time
+            { $set: { "notes.$.lastAccessed": new Date() } }
         );
 
-        // Fetch the updated note
+        // Fetch updated note
         const updatedUser = await usersCollection.findOne({ username });
-        const note = updatedUser.notes.find(n => n.noteId === noteId);
+        const note = updatedUser.notes.find(
+            n => n.noteId === noteId && !n.isDeleted
+        );
 
-        res.status(200).send(note);
+        if (!note) {
+            return res.status(404).send({ message: 'Note not found' });
+        }
+
+        const decryptedNote = {
+            ...note,
+            content: note.content ? decrypt(note.content) : ''
+        };
+
+        res.status(200).send(decryptedNote);
+
     } catch (err) {
-        res.status(500).send({ message: 'Error fetching or updating the note', error: err.message });
+        res.status(500).send({
+            message: 'Error fetching or updating the note',
+            error: err.message
+        });
     }
 });
 
